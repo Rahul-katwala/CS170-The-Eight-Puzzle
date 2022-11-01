@@ -100,7 +100,7 @@ def uniform_cost_search(puzzle, h, algorithm):
     initialTime = time.time()
     
     initialNode = node(puzzle)
-    initialNode.hCost = h
+    initialNode.hcost = h
     initialNode.depth = 0
     
     queue = [initialNode]
@@ -108,11 +108,56 @@ def uniform_cost_search(puzzle, h, algorithm):
     nodeCount = -1
     queueSize = 1
     maxQueueSize = 0
-    print('The best state to expand with a g(n) = ' + str(initialNode.depth) + ' and h(n) = ' + str(initialNode.hCost) + ' is?\n')
+    print('The best state to expand with a g(n) = ' + str(initialNode.depth) + ' and h(n) = ' + str(initialNode.hcost) + ' is?\n')
     print_puzzle(initialNode.puzzle)
     stack_to_print = []
     # We will stay in this while loop as long as the problem is not solved
     while True:
+        # Sort the queue for the lowest h(n) + g(n)
+        if algorithm != "Uniform":
+            # Using a lambda function to sort by lowest h(n) + g(n)
+            # I got the resource for sorting from: https://docs.python.org/3/howto/sorting.html
+            queue = sorted(queue, key=lambda x: (x.depth + x.hcost, x.depth))
+
+        # set currentNode to the node top of the queue and increase the nodeCount by one 
+        currentNode = queue[0]
+        nodeCount += 1
+        
+
+        # If we get the solution puzzle then traceback and print all data
+        if solved(currentNode.puzzle):
+            
+            
+        currentNode.expanded = True
+        expanded_child_nodes = expand(currentNode, encountered)
+        
+        # Fill arr with the list of children nodes 
+        childNodeList = [expanded_child_nodes.child1, expanded_child_nodes.child2, expanded_child_nodes.child3, expanded_child_nodes.child4]
+        
+        
+        queue.pop(0)
+        queueSize -= 1
+        # Updates the newNodes information 
+        for newNode in childNodeList:
+            if newNode is not None:
+            # Calculate the newNodes h cost
+                if algorithm == "Uniform":
+                    newNode.hcost = 0
+                elif algorithm == "Misplaced":
+                    newNode.hcost = misplaced(newNode.puzzle, 3)
+                elif algorithm == "Manhattan":
+                    newNode.hcost = manhattan(newNode.puzzle, 3)
+                # Updates the depth and parent for the newNodes
+                newNode.depth = currentNode.depth + 1
+                newNode.parent = currentNode
+                #Add new node to queue and list of nodes we have encountered
+                queue.append(newNode)
+                queueSize += 1
+                
+                encountered.append(newNode.puzzle)
+        stack_to_print.append(currentNode)
+        # Set maxQueueSize to the max of maxQueueSize and queueSize
+        maxQueueSize = max(maxQueueSize, queueSize)
     
 # Prints the puzzle
 def print_puzzle(puzzle):
@@ -193,6 +238,14 @@ def expand_swap(puzzle, current_row, current_column, direction):
         newNode[current_row][current_column] = temp
     
     return newNode
+
+
+def solved(puzzle):
+    final_result = ([1, 2, 3], [4, 5, 6], [7, 8, 0])
+
+    if puzzle == final_result:
+        return True
+    return False
 
 class node:
     def __init__(self, puzzle):
