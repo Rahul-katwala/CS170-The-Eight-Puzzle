@@ -104,7 +104,7 @@ def uniform_cost_search(puzzle, h, algorithm):
     initialNode.depth = 0
     
     queue = [initialNode]
-    encountered = [initialNode.puzzle]
+    encountered = {str(initialNode.puzzle): '001'}
     nodeCount = -1
     queueSize = 1
     maxQueueSize = 0
@@ -141,7 +141,6 @@ def uniform_cost_search(puzzle, h, algorithm):
             return ('Puzzle completed! \nThe number of nodes expanded were: ' + str(nodeCount) + '\nThe depth of the solution was: ' + str(currentNode.depth) + '\nThe max queue size is: ' + str(maxQueueSize) + '\nThe puzzle took ' + str(round((time.time()-initialTime), 1))  + ' seconds')
               
         # Expand all possible states from the node and place them into the child of the current node
-        currentNode.expanded = True
         expanded_child_nodes = expand(currentNode, encountered)
         
         # Fill arr with the list of children nodes 
@@ -167,7 +166,7 @@ def uniform_cost_search(puzzle, h, algorithm):
                 queue.append(newNode)
                 queueSize += 1
                 
-                encountered.append(newNode.puzzle)
+                encountered[str(newNode.puzzle)] = '001'
         stack_to_print.append(currentNode)
         # Set maxQueueSize to the max of maxQueueSize and queueSize
         maxQueueSize = max(maxQueueSize, queueSize)
@@ -185,7 +184,7 @@ def expand(currentNode, encountered):
     current_row = 0
     current_column = 0
 
-  
+    # First find the position of the 0 on the current puzzle
     for i in range(len(currentNode.puzzle)):
         for j in range(len(currentNode.puzzle)):
             if int(currentNode.puzzle[i][j]) == 0:
@@ -193,33 +192,37 @@ def expand(currentNode, encountered):
                 current_column = j
 
     
- 
+    # Check to see if current_column is the first column. If it is not we can move left.
     if current_column != 0:
-
+        #expand_swap will return the puzzle of the possible outcome after moving 0 to the appropriate location
         move_left = expand_swap(currentNode.puzzle, current_row, current_column, "left")
         
-        if move_left not in encountered:
+        # If this node already has been encountered, then we do not need to recounter it.
+        if encountered.get(str(move_left)) == None:
             currentNode.child1 = node(move_left)
 
+    # Check to see if current_column is the last column. If it is not we can move right.
     if current_column != len(currentNode.puzzle)-1:
        
         move_right= expand_swap(currentNode.puzzle, current_row, current_column, "right")
     
-        if move_right not in encountered:
+        if encountered.get(str(move_right)) == None:
             currentNode.child2 = node(move_right)
 
+    # Check to see if current_row is the first row. If it is not we can move up.
     if current_row != 0:
         
         move_up = expand_swap(currentNode.puzzle, current_row, current_column, "up")
         
-        if move_up not in encountered:
+        if encountered.get(str(move_up)) == None:
             currentNode.child3 = node(move_up)
 
+    # Check to see if current_row is the last row. If it is not we can move down.
     if current_row != len(currentNode.puzzle) - 1:
        
         move_down = expand_swap(currentNode.puzzle, current_row, current_column, "down")
         
-        if move_down not in encountered:
+        if encountered.get(str(move_down)) == None:
             currentNode.child4 = node(move_down)
 
     
@@ -227,7 +230,7 @@ def expand(currentNode, encountered):
 
 
 def expand_swap(puzzle, current_row, current_column, direction):
-
+# Resource used for deepcopy: https://docs.python.org/3/library/copy.html
     newNode = copy.deepcopy(puzzle)
     
     if (direction == "up"): # Swaps the 0 with the one which is one spot up
