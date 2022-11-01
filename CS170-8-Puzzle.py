@@ -106,6 +106,54 @@ def print_puzzle(puzzle):
         print(puzzle[i])
 
     print('\n')
+    
+#This function allows us to expand the node to other nodes that it could possibly become after moving 0.
+def expand(currentNode, encountered):
+    current_row = 0
+    current_column = 0
+
+  
+    for i in range(len(currentNode.puzzle)):
+        for j in range(len(currentNode.puzzle)):
+            if int(currentNode.puzzle[i][j]) == 0:
+                current_row = i
+                current_column = j
+
+    
+ 
+    if current_column != 0:
+
+        move_left = expand_swap(currentNode.puzzle, current_row, current_column, "left")
+        
+        if move_left not in encountered:
+            currentNode.child1 = node(move_left)
+
+    if current_column != len(currentNode.puzzle)-1:
+       
+        move_right= expand_swap(currentNode.puzzle, current_row, current_column, "right")
+    
+        if move_right not in encountered:
+            currentNode.child2 = node(move_right)
+
+    if current_row != 0:
+        
+        move_up = expand_swap(currentNode.puzzle, current_row, current_column, "up")
+        
+        if move_up not in encountered:
+            currentNode.child3 = node(move_up)
+
+    if current_row != len(currentNode.puzzle) - 1:
+       
+        move_down = expand_swap(currentNode.puzzle, current_row, current_column, "down")
+        
+        if move_down not in encountered:
+            currentNode.child4 = node(move_down)
+
+    
+    return currentNode
+
+
+def expand_swap(puzzle, current_row, current_column, direction):
 
                 
 if __name__ == "__main__":
