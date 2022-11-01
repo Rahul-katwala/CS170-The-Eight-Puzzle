@@ -95,9 +95,24 @@ def misplaced(puzzle, puzzleLength):
     return count
     
 def uniform_cost_search(puzzle, h, algorithm):
-    print_puzzle(puzzle)
-    print('puzzle\n')
-    return (str(h) + ' is the h cost \n')
+
+
+    initialTime = time.time()
+    
+    initialNode = node(puzzle)
+    initialNode.hCost = h
+    initialNode.depth = 0
+    
+    queue = [initialNode]
+    encountered = [initialNode.puzzle]
+    nodeCount = -1
+    queueSize = 1
+    maxQueueSize = 0
+    print('The best state to expand with a g(n) = ' + str(initialNode.depth) + ' and h(n) = ' + str(initialNode.hCost) + ' is?\n')
+    print_puzzle(initialNode.puzzle)
+    stack_to_print = []
+    # We will stay in this while loop as long as the problem is not solved
+    while True:
     
 # Prints the puzzle
 def print_puzzle(puzzle):
@@ -154,6 +169,43 @@ def expand(currentNode, encountered):
 
 
 def expand_swap(puzzle, current_row, current_column, direction):
+
+    newNode = copy.deepcopy(puzzle)
+    
+    if (direction == "up"): # Swaps the 0 with the one which is one spot up
+        temp = newNode[current_row-1][current_column]
+        newNode[current_row-1][current_column] = newNode[current_row][current_column]
+        newNode[current_row][current_column] = temp
+    
+    elif (direction == "down"): # Swaps the 0 with the one which is one spot down
+        temp = newNode[current_row+1][current_column]
+        newNode[current_row+1][current_column] = newNode[current_row][current_column]
+        newNode[current_row][current_column] = temp
+        
+    elif (direction == "right"): # Swaps the 0 with the one which is one spot right
+        temp = newNode[current_row][current_column+1]
+        newNode[current_row][current_column+1] = newNode[current_row][current_column]
+        newNode[current_row][current_column] = temp
+    
+    elif (direction == "left"): # Swaps the 0 with the one which is one spot left
+        temp = newNode[current_row][current_column-1]
+        newNode[current_row][current_column-1] = newNode[current_row][current_column]
+        newNode[current_row][current_column] = temp
+    
+    return newNode
+
+class node:
+    def __init__(self, puzzle):
+        self.puzzle = puzzle
+        self.hCost = 0
+        self.depth = 0
+        self.child1 = None
+        self.child2 = None
+        self.child3 = None
+        self.child4 = None
+        self.parent = None
+        self.expanded = False
+    
 
                 
 if __name__ == "__main__":
