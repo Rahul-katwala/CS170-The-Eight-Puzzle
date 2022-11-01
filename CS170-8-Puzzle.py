@@ -124,10 +124,23 @@ def uniform_cost_search(puzzle, h, algorithm):
         nodeCount += 1
         
 
-        # If we get the solution puzzle then traceback and print all data
+        # If we make it to goal state print some data
         if solved(currentNode.puzzle):
+            solutionPath = currentNode
+            solutionPathList = []
+            while solutionPath.parent != None:
+                solutionPathList.append(solutionPath)
+                solutionPath = solutionPath.parent
             
+            for solutionPath in (stack_to_print):
+                print('The best state to expand with a g(n) = ' + str(solutionPath.depth) + ' and h(n) = ' + str(solutionPath.hcost) + ' is?\n')
+                print_puzzle(solutionPath.puzzle)
             
+            print('The best state to expand with a g(n) = ' + str(currentNode.depth) + ' and h(n) = ' + str(currentNode.hcost) + ' is?\n')
+            print_puzzle(currentNode.puzzle)
+            return ('Puzzle completed! \nThe number of nodes expanded were: ' + str(nodeCount) + '\nThe depth of the solution was: ' + str(currentNode.depth) + '\nThe max queue size is: ' + str(maxQueueSize) + '\nThe puzzle took ' + str(round((time.time()-initialTime), 1))  + ' seconds')
+              
+        # Expand all possible states from the node and place them into the child of the current node
         currentNode.expanded = True
         expanded_child_nodes = expand(currentNode, encountered)
         
@@ -257,7 +270,6 @@ class node:
         self.child3 = None
         self.child4 = None
         self.parent = None
-        self.expanded = False
     
 
                 
