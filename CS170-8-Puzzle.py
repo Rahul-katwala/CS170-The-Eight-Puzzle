@@ -16,13 +16,13 @@ def main():
         print('Enter your puzzle, use a zero to represent the blank \n')
 
         # Gets first row
-        puzzle_row_one = input('Enter the first row with spaces between each number: ').split(' ')
+        puzzle_row_one = raw_input('Enter the first row with spaces between each number: ').split(' ')
 
         # Gets second row
-        puzzle_row_two = input('Enter the second row with spaces between each number: ').split(' ')
+        puzzle_row_two = raw_input('Enter the second row with spaces between each number: ').split(' ')
 
         # Gets third row
-        puzzle_row_three = input('Enter the third row. with commas between each number: ').split(' ')
+        puzzle_row_three = raw_input('Enter the third row. with commas between each number: ').split(' ')
         # Converts all elements in array to a type int
         for i in range(0, 3):
             puzzle_row_one[i] = int(puzzle_row_one[i])
@@ -30,24 +30,74 @@ def main():
             puzzle_row_three[i] = int(puzzle_row_three[i])
         puzzle = puzzle_row_one, puzzle_row_two, puzzle_row_three
         
-    # Let user choose which algorithm they would like to use. Will return h value and string representing which algorithm as a tuplet
+    # Allowing the user to choose heuristic and algorithm
     algorithmChoice = select_and_init_algorithm(puzzle)
-   
-
-# function to choose the algorithm and calculate h
+    # Running the program and printing the output
+    print(uniform_cost_search(puzzle, algorithmChoice[0], algorithmChoice[1]))
+    
+    
 def select_and_init_algorithm(puzzle):
-    algorithm = input("Select algorithm. (1) for Uniform Cost Search, (2) for the Misplaced Tile Heuristic, "
-    "or (3) the Manhattan Distance Heuristic.\n")
+    algorithm = int(input("Select algorithm. (1) for Uniform Cost Search, (2) for the Misplaced Tile Heuristic, "
+    "or (3) the Manhattan Distance Heuristic.\n"))
     h = 0
     if (algorithm == 3):
-        # h = manhattan(puzzle, puzzleLength)
-        # return h, "Manhattan"
+        h = manhattan(puzzle, 3)
+        return h, "Manhattan"
     elif (algorithm == 2):
-        # h = misplaced(puzzle, puzzleLength)
-        # return h, "Misplaced"
+        h = misplaced(puzzle, 3)
+        return h, "Misplaced"
     return h, "Uniform"
     
+    
+def manhattan(puzzle, puzzleLength):
+    final_result = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+    sum = 0
+    solution_row = 0
+    solution_column = 0
+    current_row = 0
+    current_column = 0
+    found = 0
+    #returns the sum of the distance of each number position and it's position on the solution path
+    for l in range(1, 9):
+        found = 0
+        for i in range(puzzleLength):
+            #if found == 2 then break out of loop as this number has been accounted for
+            if found == 2:
+                break
+            for j in range(puzzleLength):
+                if puzzle[i][j] == l:
+                    current_row = i
+                    current_column = j
+                    found+=1
+                    if found == 2:
+                        break
+                if final_result[i][j] == l:
+                    solution_row = i
+                    solution_column = j
+                    found+=1
+                    if found == 2:
+                        break
+        #Add the sum of the two differences between the rows and columns             
+        sum = sum + (abs(solution_row-current_row) + abs(solution_column-current_column))
 
+    return sum
+    
+        
+def misplaced(puzzle, puzzleLength):
+    final_result = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+    count = 0
+    #returns the count of misplaced numbers when compared to the solution
+    for i in range(puzzleLength):
+        for j in range(puzzleLength):
+            if int(puzzle[i][j]) != final_result[i][j]:
+                if int(puzzle[i][j]) != 0:
+                    count += 1
+    return count
+    
+def uniform_cost_search(puzzle, h, algorithm):
+    print_puzzle(puzzle)
+    print('puzzle\n')
+    return (str(h) + ' is the h cost \n')
     
 # Prints the puzzle
 def print_puzzle(puzzle):
