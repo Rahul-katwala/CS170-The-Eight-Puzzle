@@ -4,36 +4,34 @@ import sys
 
 
 def main():
-    # Getting user input for if they want to use default or their own
+    # Getting user input for if they want to use default or their own custom one
     inputnum = int(input("Welcome to an 8-Puzzle Solver. Type '1' to use a default puzzle, or '2' to create your own.\n"))
 
-    # Setting up puzzle if user uses a custom puzzle
+    # Setting up the puzzle if user wants to create a custom puzzle
     if inputnum == 1:
         puzzle = ([0, 1, 2], [4, 5, 3], [7, 8, 6])
         
     else:
         print('Enter your puzzle, use a zero to represent the blank \n')
 
-        # Getting the first row
+        # Gets the puzzle
         puzzle_row_one = raw_input('Enter the first row with spaces between each number: ').split(' ')
-
-        # Getting the second row
         puzzle_row_two = raw_input('Enter the second row with spaces between each number: ').split(' ')
-
-        # Getting the third row
         puzzle_row_three = raw_input('Enter the third row. with commas between each number: ').split(' ')
+        # Changing all values to int
         for i in range(0, 3):
             puzzle_row_one[i] = int(puzzle_row_one[i])
             puzzle_row_two[i] = int(puzzle_row_two[i])
             puzzle_row_three[i] = int(puzzle_row_three[i])
         puzzle = puzzle_row_one, puzzle_row_two, puzzle_row_three
         
-    # Allowing the user to choose heuristic and algorithm
+    # Chooses heuristic and algorithm
     algorithmChoice = select_and_init_algorithm(puzzle)
-    # Running the program and printing the output
+    # Calling the search 
     print(uniform_cost_search(puzzle, algorithmChoice[0], algorithmChoice[1]))
     
     
+#Chooses the algorithm
 def select_and_init_algorithm(puzzle):
     algorithm = int(input("Select algorithm. (1) for Uniform Cost Search, (2) for the Misplaced Tile Heuristic, "
     "or (3) the Manhattan Distance Heuristic.\n"))
@@ -66,17 +64,17 @@ def manhattan(puzzle, puzzleLength):
                 if puzzle[i][j] == l:
                     current_row = i
                     current_column = j
-                    found+=1
+                    found += 1
                     if found == 2:
                         break
                 if final_result[i][j] == l:
                     solution_row = i
                     solution_column = j
-                    found+=1
+                    found += 1
                     if found == 2:
                         break
         #Add the sum of the two differences between the rows and columns             
-        sum = sum + (abs(solution_row-current_row) + abs(solution_column-current_column))
+        sum = sum + (abs(solution_row - current_row) + abs(solution_column - current_column))
 
     return sum
     
@@ -89,29 +87,30 @@ def misplaced(puzzle, puzzleLength):
         for column in range(puzzleLength):
             if int(puzzle[row][column]) != final_result[row][column]:
                 if int(puzzle[row][column]) != 0:
+                    # If they dont match and it is not a 0 then increment misplacedCounter by 1
                     misplacedCounter += 1
     return misplacedCounter
     
     
 def uniform_cost_search(puzzle, h, algorithm):
 
+    # Starts the time the algorithm started
     initialTime = time.time()
-    
+    # Initalizing the first node
     initialNode = node(puzzle)
     initialNode.hcost = h
     initialNode.depth = 0
-    
+    # We will use queue to hold all the nodes that were created but not explored yet
     queue = [initialNode]
+    # encountered will be a hash of all the nodes puzzles we have already visited
     encountered = {str(initialNode.puzzle): '001'}
     nodeCount = -1
     queueSize = 1
     maxQueueSize = 0
-    print('The best state to expand with a g(n) = ' + str(initialNode.depth) + ' and h(n) = ' + str(initialNode.hcost) + ' is?\n')
-    print_puzzle(initialNode.puzzle)
     stack_to_print = []
     # We will stay in this while loop as long as the problem is not solved
     while True:
-        # Sort the queue for the lowest h(n) + g(n)
+        
         if algorithm != "Uniform":
             # Using a lambda function to sort by lowest h(n) + g(n)
             # I got the resource for sorting from: https://docs.python.org/3/howto/sorting.html
@@ -121,9 +120,9 @@ def uniform_cost_search(puzzle, h, algorithm):
         currentNode = queue[0]
         nodeCount += 1
         
-
-        # If we make it to goal state print some data
+        # If we solve the puzzle then print the traceback of the solution.
         if solved(currentNode.puzzle):
+            # Gets full solution path in reverse 
             solutionPath = currentNode
             solutionPathList = []
             while solutionPath.parent != None:
@@ -131,20 +130,30 @@ def uniform_cost_search(puzzle, h, algorithm):
                 solutionPath = solutionPath.parent
             
             for solutionPath in (stack_to_print):
-                print('The best state to expand with a g(n) = ' + str(solutionPath.depth) + ' and h(n) = ' + str(solutionPath.hcost) + ' is?\n')
                 print_puzzle(solutionPath.puzzle)
+                print('The best state to expand with a g(n) = ' + str(solutionPath.depth) + ' and h(n) = ' + str(solutionPath.hcost) + ' is?\n')
             
-            print('The best state to expand with a g(n) = ' + str(currentNode.depth) + ' and h(n) = ' + str(currentNode.hcost) + ' is?\n')
             print_puzzle(currentNode.puzzle)
-            return ('Puzzle completed! \nThe number of nodes expanded were: ' + str(nodeCount) + '\nThe depth of the solution was: ' + str(currentNode.depth) + '\nThe max queue size is: ' + str(maxQueueSize) + '\nThe puzzle took ' + str(round((time.time()-initialTime), 1))  + ' seconds')
-              
+            print('The best state to expand with a g(n) = ' + str(currentNode.depth) + ' and h(n) = ' + str(currentNode.hcost) + ' is?\n')
+            # I got the resource for round from https://docs.python.org/3/library/functions.html?highlight=round#round
+            print('Puzzle completed! \nThe number of nodes expanded were: ' + str(nodeCount) + '\nThe depth of the solution was: ' + str(currentNode.depth) + '\nThe max queue size is: ' + str(maxQueueSize) + '\nThe puzzle took ' + str(round((time.time()-initialTime), 1))  + ' seconds')
+            # Gives chance to see the full solution path 
+            inputnum = raw_input('Press 1 to see the solution path. Press anything else to quit\n')
+            if inputnum == '1':
+                print_puzzle(initialNode.puzzle)
+                for solutionPath in reversed(solutionPathList):
+                    print_puzzle(solutionPath.puzzle)
+                return 'Ending...'
+            else:
+                return 'Ending...'
+            
         # Expand all possible states from the node and place them into the child of the current node
         expanded_child_nodes = expand(currentNode, encountered)
         
         # Fill arr with the list of children nodes 
         childNodeList = [expanded_child_nodes.child1, expanded_child_nodes.child2, expanded_child_nodes.child3, expanded_child_nodes.child4]
         
-        
+        # pop the first element of queue since we have already encountered it
         queue.pop(0)
         queueSize -= 1
         # Updates the newNodes information 
@@ -160,14 +169,14 @@ def uniform_cost_search(puzzle, h, algorithm):
                 # Updates the depth and parent for the newNodes
                 newNode.depth = currentNode.depth + 1
                 newNode.parent = currentNode
-                #Add new node to queue and list of nodes we have encountered
+                #Add new node to queue and list of nodes we have encountered to make sure we do not see it again
                 queue.append(newNode)
                 queueSize += 1
-                
                 encountered[str(newNode.puzzle)] = '001'
         stack_to_print.append(currentNode)
         # Set maxQueueSize to the max of maxQueueSize and queueSize
         maxQueueSize = max(maxQueueSize, queueSize)
+    
     
 # Prints the puzzle
 def print_puzzle(puzzle):
@@ -176,7 +185,8 @@ def print_puzzle(puzzle):
 
     print('\n')
     
-#This function allows us to expand the node to other nodes that it could possibly become after moving 0.
+    
+#This function will return all the possible child nodes of currentNode
 def expand(currentNode, encountered):
     current_row = 0
     current_column = 0
@@ -187,21 +197,20 @@ def expand(currentNode, encountered):
             if int(currentNode.puzzle[i][j]) == 0:
                 current_row = i
                 current_column = j
-
-    
+                
     # Check to see if current_column is the first column. If it is not we can move left.
     if current_column != 0:
-        #expand_swap will return the puzzle of the possible outcome after moving 0 to the appropriate location
-        move_left = expand_swap(currentNode.puzzle, current_row, current_column, "left")
+        #getChild will return the puzzle of the possible outcome after moving 0 to the appropriate location
+        move_left = getChild(currentNode.puzzle, current_row, current_column, "left")
         
         # If this node already has been encountered, then we do not need to recounter it.
         if encountered.get(str(move_left)) == None:
             currentNode.child1 = node(move_left)
 
     # Check to see if current_column is the last column. If it is not we can move right.
-    if current_column != len(currentNode.puzzle)-1:
+    if current_column != len(currentNode.puzzle) - 1:
        
-        move_right= expand_swap(currentNode.puzzle, current_row, current_column, "right")
+        move_right= getChild(currentNode.puzzle, current_row, current_column, "right")
     
         if encountered.get(str(move_right)) == None:
             currentNode.child2 = node(move_right)
@@ -209,7 +218,7 @@ def expand(currentNode, encountered):
     # Check to see if current_row is the first row. If it is not we can move up.
     if current_row != 0:
         
-        move_up = expand_swap(currentNode.puzzle, current_row, current_column, "up")
+        move_up = getChild(currentNode.puzzle, current_row, current_column, "up")
         
         if encountered.get(str(move_up)) == None:
             currentNode.child3 = node(move_up)
@@ -217,7 +226,7 @@ def expand(currentNode, encountered):
     # Check to see if current_row is the last row. If it is not we can move down.
     if current_row != len(currentNode.puzzle) - 1:
        
-        move_down = expand_swap(currentNode.puzzle, current_row, current_column, "down")
+        move_down = getChild(currentNode.puzzle, current_row, current_column, "down")
         
         if encountered.get(str(move_down)) == None:
             currentNode.child4 = node(move_down)
@@ -226,39 +235,42 @@ def expand(currentNode, encountered):
     return currentNode
 
 
-def expand_swap(puzzle, current_row, current_column, direction):
+def getChild(puzzle, current_row, current_column, direction):
 # Resource used for deepcopy: https://docs.python.org/3/library/copy.html
     newNode = copy.deepcopy(puzzle)
     
     if (direction == "up"): # Swaps the 0 with the one which is one spot up
-        temp = newNode[current_row-1][current_column]
-        newNode[current_row-1][current_column] = newNode[current_row][current_column]
+        # Swaps the tile and blank spot 
+        temp = newNode[current_row - 1][current_column]
+        newNode[current_row - 1][current_column] = newNode[current_row][current_column]
         newNode[current_row][current_column] = temp
     
     elif (direction == "down"): # Swaps the 0 with the one which is one spot down
-        temp = newNode[current_row+1][current_column]
-        newNode[current_row+1][current_column] = newNode[current_row][current_column]
+        temp = newNode[current_row + 1][current_column]
+        newNode[current_row + 1][current_column] = newNode[current_row][current_column]
         newNode[current_row][current_column] = temp
         
     elif (direction == "right"): # Swaps the 0 with the one which is one spot right
-        temp = newNode[current_row][current_column+1]
-        newNode[current_row][current_column+1] = newNode[current_row][current_column]
+        temp = newNode[current_row][current_column + 1]
+        newNode[current_row][current_column + 1] = newNode[current_row][current_column]
         newNode[current_row][current_column] = temp
     
     elif (direction == "left"): # Swaps the 0 with the one which is one spot left
-        temp = newNode[current_row][current_column-1]
-        newNode[current_row][current_column-1] = newNode[current_row][current_column]
+        temp = newNode[current_row][current_column - 1]
+        newNode[current_row][current_column - 1] = newNode[current_row][current_column]
         newNode[current_row][current_column] = temp
     
     return newNode
 
 
+# Checks if the puzzle has been solved
 def solved(puzzle):
     final_result = ([1, 2, 3], [4, 5, 6], [7, 8, 0])
 
     if puzzle == final_result:
         return True
     return False
+
 
 class node:
     def __init__(self, puzzle):
