@@ -4,26 +4,24 @@ import sys
 
 
 def main():
-    
-    # Ask user if they want to use a default puzzle or make their own
+    # Getting user input for if they want to use default or their own
     inputnum = int(input("Welcome to an 8-Puzzle Solver. Type '1' to use a default puzzle, or '2' to create your own.\n"))
 
-    # If user wants a default puzzle
+    # Setting up puzzle if user uses a custom puzzle
     if inputnum == 1:
         puzzle = ([0, 1, 2], [4, 5, 3], [7, 8, 6])
         
     else:
         print('Enter your puzzle, use a zero to represent the blank \n')
 
-        # Gets first row
+        # Getting the first row
         puzzle_row_one = raw_input('Enter the first row with spaces between each number: ').split(' ')
 
-        # Gets second row
+        # Getting the second row
         puzzle_row_two = raw_input('Enter the second row with spaces between each number: ').split(' ')
 
-        # Gets third row
+        # Getting the third row
         puzzle_row_three = raw_input('Enter the third row. with commas between each number: ').split(' ')
-        # Converts all elements in array to a type int
         for i in range(0, 3):
             puzzle_row_one[i] = int(puzzle_row_one[i])
             puzzle_row_two[i] = int(puzzle_row_two[i])
@@ -85,17 +83,17 @@ def manhattan(puzzle, puzzleLength):
         
 def misplaced(puzzle, puzzleLength):
     final_result = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
-    count = 0
+    misplacedCounter = 0
     #returns the count of misplaced numbers when compared to the solution
-    for i in range(puzzleLength):
-        for j in range(puzzleLength):
-            if int(puzzle[i][j]) != final_result[i][j]:
-                if int(puzzle[i][j]) != 0:
-                    count += 1
-    return count
+    for row in range(puzzleLength):
+        for column in range(puzzleLength):
+            if int(puzzle[row][column]) != final_result[row][column]:
+                if int(puzzle[row][column]) != 0:
+                    misplacedCounter += 1
+    return misplacedCounter
+    
     
 def uniform_cost_search(puzzle, h, algorithm):
-
 
     initialTime = time.time()
     
@@ -173,7 +171,6 @@ def uniform_cost_search(puzzle, h, algorithm):
     
 # Prints the puzzle
 def print_puzzle(puzzle):
-
     for i in range(0, 3):
         print(puzzle[i])
 
